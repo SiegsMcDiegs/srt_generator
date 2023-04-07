@@ -10,6 +10,7 @@ from pydub import AudioSegment
 import os
 import subprocess
 import tempfile
+from subtitle_utils import generate_srt, get_audio_spikes
 
 
 class SubtitleEditor:
@@ -30,6 +31,10 @@ class SubtitleEditor:
         self.open_button = tk.Button(self.root, text='Open', command=self.open_file)
         self.open_button.pack()
 
+        # Create a "Generate SRT" button to generate the SRT file
+        self.generate_button = tk.Button(self.root, text='Generate SRT', command=self.generate_srt)
+        self.generate_button.pack()
+
     def display_waveform(self):
         # Convert the MP4 file to a WAV file
         with tempfile.NamedTemporaryFile(suffix='.wav') as f:
@@ -46,6 +51,22 @@ class SubtitleEditor:
         plt.plot(audio)
         plt.show()
         self.canvas.draw()
+
+    def generate_srt(self):
+        # Display a file dialog window and get the selected file
+        filetypes = [('MP4 Files', '*.mp4')]
+        file_path = filedialog.askopenfilename(title='Open', filetypes=filetypes)
+
+        # Generate the list of spikes from the selected MP4 file
+        spikes, start_time, end_time = get_audio_spikes(file_path)
+
+        # Generate the SRT file
+        srt_file = generate_srt(spikes, start_time, end_time)
+
+        # Write the SRT file to disk
+        with open('output.srt', 'w') as f:
+            f.write(srt_file)
+
 
 
 
